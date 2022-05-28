@@ -1,24 +1,44 @@
 import Phaser from 'phaser';
+import { initGame } from "../logic/uno"
 
-export default class Demo extends Phaser.Scene {
+export default class Uno extends Phaser.Scene {
   constructor() {
-    super('GameScene');
+    super('Uno');
   }
 
   preload() {
     this.load.image('logo', 'assets/phaser3-logo.png');
+    this.load.atlas('cards', 'assets/atlas/uno-front.png', "assets/atlas/uno-front.json")
   }
 
   create() {
-    const logo = this.add.image(400, 70, 'logo');
+    var frames = this.textures.get('cards').getFrameNames();
+    var state = initGame()
 
-    this.tweens.add({
-      targets: logo,
-      y: 350,
-      duration: 1500,
-      ease: 'Sine.inOut',
-      yoyo: true,
-      repeat: -1
-    });
+    var x = 100;
+    var y = 100;
+
+    for (const card of state.draw_pile)
+    {
+        const cardImage = this.add.image(x, y, 'cards', card.face + card.color)
+        cardImage.displayHeight = 200
+        cardImage.displayWidth = 150
+        cardImage.setInteractive();
+
+        x += 4;
+        y += 4;
+    }
+
+
+    this.input.on('gameobjectdown', function (this: any, pointer: any, gameObject: any) {
+
+      //  Will contain the top-most Game Object (in the display list)
+      this.tweens.add({
+          targets: gameObject,
+          x: { value: 1100, duration: 1500, ease: 'Power2' },
+          y: { value: 500, duration: 500, ease: 'Bounce.easeOut', delay: 150 }
+      });
+
+  }, this);
   }
 }
